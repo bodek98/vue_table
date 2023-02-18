@@ -1,0 +1,136 @@
+{
+  "0": {
+    "ID": 1,
+    "PRODUCENT": "SAMSUNG",
+    "MODEL": "TLS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 11,
+        "PRODUCENT": "WD",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "1": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 11,
+        "PRODUCENT": "WD",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "2": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 13,
+        "PRODUCENT": "WDBlue",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "3": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 14,
+        "PRODUCENT": "WDRed",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "4": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 11,
+        "PRODUCENT": "WD",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "5": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 11,
+        "PRODUCENT": "WD",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  },
+  "6": {
+    "ID": 1,
+    "PRODUCENT": "LG",
+    "MODEL": "ETS245",
+    "S/N": "WER29230T09",
+    "COMPONENTS": {
+      "0": {
+        "ID": 11,
+        "PRODUCENT": "WD",
+        "MODEL": "WR25GB",
+        "SN": "WER45323"
+      },
+      "1": {
+        "ID": 12,
+        "PRODUCENT": "Gigabajt",
+        "MODEL": "TEZ233",
+        "SN": "WER45323"
+      }
+    }
+  }
+}
