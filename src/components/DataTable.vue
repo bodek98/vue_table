@@ -5,21 +5,14 @@
   <table>
     <thead>
       <tr>
-        <th>column</th>
-        <th>column</th>
-        <th>column</th>
-        <th>column</th>
-        <th>column</th>
+        <th v-for="(header, index) in headers" :key="index">{{ header }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(item, index) in items" :key="index">
-        <td>{{ index }}</td>
-        <td>{{ item.ID }}</td>
-        <td>{{ item.PRODUCENT }}</td>
-        <td>{{ item.MODEL }}</td>
-        <td>{{ item["S/N"] }}</td>
-        <!-- <td>{{ item.COMPONENTS }}</td> -->
+      <tr v-for="(row, index) in rows" :key="index">
+        <td v-for="(rowItem, itemIndex) in row" :key="itemIndex">
+          {{ rowItem }}
+        </td>
       </tr>
     </tbody>
   </table>
@@ -29,14 +22,15 @@
 import { onMounted, ref } from "@vue/runtime-core";
 import axios from "axios";
 export default {
-  name: "HelloWorld",
+  name: "DataTable",
   props: {
     msg: String,
   },
   setup() {
     const baseUrl = ref("http://localhost:3000");
     let urls = ref([]);
-    let items = ref([]);
+    const headers = ref(["ID", "PRODUCENT", "MODEL", "S/N", "COMPONENTS"]);
+    let rows = ref([]);
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
@@ -56,15 +50,17 @@ export default {
             urls.value.map((url) => axios.get(url))
           );
           const data = responses.map((response) => response.data);
-          items.value = data;
+          rows.value = data;
         } catch (error) {
           console.error(error);
         }
+        console.log(rows.value);
       };
       fetchData();
     });
     return {
-      items,
+      rows,
+      headers,
     };
   },
 };
