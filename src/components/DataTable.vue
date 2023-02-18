@@ -2,6 +2,10 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
   </div>
+  <div>
+    <input type="text" placeholder="Search" v-model="search" />
+    {{ search }}
+  </div>
   <table>
     <thead>
       <tr>
@@ -11,7 +15,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, index) in rows" :key="index">
+      <tr v-for="(row, index) in filteredRows" :key="index">
         <td v-for="(rowItem, itemKey, idx) in row" :key="idx">
           <template v-if="itemKey === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
@@ -34,7 +38,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from "@vue/runtime-core";
+import { computed, onMounted, ref } from "@vue/runtime-core";
 import axios from "axios";
 export default {
   name: "DataTable",
@@ -47,9 +51,11 @@ export default {
     const headers = ref(["ID", "PRODUCENT", "MODEL", "S/N", "COMPONENTS"]);
     let rows = ref([]);
     const isExpanded = ref(false);
+    let search = ref("");
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
+
       while (keepGoing) {
         const url = `${baseUrl.value}/${i.value}`;
         try {
@@ -60,6 +66,7 @@ export default {
           keepGoing = false;
         }
       }
+
       const fetchData = async () => {
         try {
           const responses = await Promise.all(
@@ -77,6 +84,7 @@ export default {
       };
       fetchData();
     });
+
     const expandRow = (row) => {
       if (row.isExpanded === false) {
         row.isExpanded = true;
@@ -84,11 +92,45 @@ export default {
         row.isExpanded = false;
       }
     };
+
+    const deepSearch = (obj, searchText) => {
+      if (typeof obj === "object" && obj !== null) {
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key];
+            if (typeof value === "object" && value !== null) {
+              if (deepSearch(value, searchText)) {
+                return true;
+              }
+            } else if (
+              typeof value === "string" &&
+              value.toLowerCase().includes(searchText.toLowerCase())
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
+
+    const filteredRows = computed(() => {
+      const searchText = search.value.trim();
+      if (searchText.length > 0) {
+        return rows.value.filter((row) => {
+          return deepSearch(row, searchText);
+        });
+      }
+      return rows.value;
+    });
+
     return {
       rows,
       headers,
       isExpanded,
       expandRow,
+      filteredRows,
+      search,
     };
   },
 };
