@@ -10,8 +10,16 @@
     </thead>
     <tbody>
       <tr v-for="(row, index) in rows" :key="index">
-        <td v-for="(rowItem, itemIndex) in row" :key="itemIndex">
-          {{ rowItem }}
+        <td v-for="(rowItem, itemKey, idx) in row" :key="idx">
+          <template v-if="idx === rows.length - 3">
+            <button @click="expandRow(row, rowItem)">Show</button>
+            <template v-if="row.isExpanded">
+              <tr>
+                <td>{{ row.COMPONENTS }}</td>
+              </tr>
+            </template>
+          </template>
+          <template v-else> {{ rowItem }} </template>
         </td>
       </tr>
     </tbody>
@@ -31,6 +39,7 @@ export default {
     let urls = ref([]);
     const headers = ref(["ID", "PRODUCENT", "MODEL", "S/N", "COMPONENTS"]);
     let rows = ref([]);
+    const isExpanded = ref(false);
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
@@ -49,18 +58,26 @@ export default {
           const responses = await Promise.all(
             urls.value.map((url) => axios.get(url))
           );
-          const data = responses.map((response) => response.data);
+          const data = responses.map((response) => ({
+            ...response.data,
+            isExpanded: false,
+          }));
           rows.value = data;
         } catch (error) {
           console.error(error);
         }
-        console.log(rows.value);
+        console.log(rows.value[1].COMPONENTS);
       };
       fetchData();
     });
+    const expandRow = (row) => {
+      row.isExpanded = true;
+    };
     return {
       rows,
       headers,
+      isExpanded,
+      expandRow,
     };
   },
 };
