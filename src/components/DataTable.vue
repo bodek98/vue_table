@@ -5,21 +5,28 @@
   <table>
     <thead>
       <tr>
-        <th v-for="(header, index) in headers" :key="index">{{ header }}</th>
+        <th v-for="(header, index) in headers" :key="index">
+          {{ header }}
+        </th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="(row, index) in rows" :key="index">
         <td v-for="(rowItem, itemKey, idx) in row" :key="idx">
-          <template v-if="idx === rows.length - 3">
-            <button @click="expandRow(row, rowItem)">Show</button>
+          <template v-if="itemKey === 'COMPONENTS'">
+            <button @click="expandRow(row)">v</button>
             <template v-if="row.isExpanded">
-              <tr>
-                <td>{{ row.COMPONENTS }}</td>
+              <tr v-for="(component, cIndex) in row.COMPONENTS" :key="cIndex">
+                <td>{{ component.ID }}</td>
+                <td>{{ component.PRODUCENT }}</td>
+                <td>{{ component.MODEL }}</td>
+                <td>{{ component.SN }}</td>
               </tr>
             </template>
           </template>
-          <template v-else> {{ rowItem }} </template>
+          <template v-else-if="itemKey !== 'isExpanded'">
+            <td>{{ rowItem }}</td>
+          </template>
         </td>
       </tr>
     </tbody>
@@ -71,7 +78,11 @@ export default {
       fetchData();
     });
     const expandRow = (row) => {
-      row.isExpanded = true;
+      if (row.isExpanded === false) {
+        row.isExpanded = true;
+      } else {
+        row.isExpanded = false;
+      }
     };
     return {
       rows,
