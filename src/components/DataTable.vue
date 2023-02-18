@@ -11,6 +11,13 @@
       <tr>
         <th v-for="(header, index) in headers" :key="index">
           {{ header }}
+          <template v-if="header !== 'COMPONENTS'">
+            <input
+              type="text"
+              :placeholder="header"
+              v-model="filters[header]"
+            />
+          </template>
         </th>
       </tr>
     </thead>
@@ -38,7 +45,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref } from "@vue/runtime-core";
+import { computed, onMounted, reactive, ref } from "@vue/runtime-core";
 import axios from "axios";
 export default {
   name: "DataTable",
@@ -52,6 +59,7 @@ export default {
     let rows = ref([]);
     const isExpanded = ref(false);
     let search = ref("");
+    const filters = reactive({ ID: "", PRODUCENT: "", MODEL: "", "S/N": "" });
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
@@ -116,10 +124,31 @@ export default {
 
     const filteredRows = computed(() => {
       const searchText = search.value.trim();
+
       if (searchText.length > 0) {
         return rows.value.filter((row) => {
           return deepSearch(row, searchText);
         });
+      }
+      if (filters.ID.trim().length > 0) {
+        return rows.value.filter((row) =>
+          row.ID.toString().toLowerCase().includes(filters.ID.toLowerCase())
+        );
+      }
+      if (filters.PRODUCENT.trim().length > 0) {
+        return rows.value.filter((row) =>
+          row.PRODUCENT.toLowerCase().includes(filters.PRODUCENT.toLowerCase())
+        );
+      }
+      if (filters.MODEL.trim().length > 0) {
+        return rows.value.filter((row) =>
+          row.MODEL.toLowerCase().includes(filters.MODEL.toLowerCase())
+        );
+      }
+      if (filters["S/N"].trim().length > 0) {
+        return rows.value.filter((row) =>
+          row["S/N"].toLowerCase().includes(filters["S/N"].toLowerCase())
+        );
       }
       return rows.value;
     });
@@ -131,6 +160,7 @@ export default {
       expandRow,
       filteredRows,
       search,
+      filters,
     };
   },
 };
