@@ -128,53 +128,64 @@ export default {
     };
 
     const deepSearch = (obj, searchText) => {
-      if (typeof obj === "object" && obj !== null) {
-        for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            const value = obj[key];
-            if (typeof value === "object" && value !== null) {
-              if (deepSearch(value, searchText)) {
+      const stack = [obj];
+
+      while (stack.length > 0) {
+        const currentObj = stack.pop();
+
+        if (typeof currentObj === "object" && currentObj !== null) {
+          for (const key in currentObj) {
+            if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
+              const value = currentObj[key];
+              if (typeof value === "object" && value !== null) {
+                stack.push(value);
+              } else if (
+                (typeof value === "string" || typeof value === "number") &&
+                value
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase())
+              ) {
                 return true;
               }
-            } else if (
-              (typeof value === "string" || typeof value === "number") &&
-              value.toString().toLowerCase().includes(searchText.toLowerCase())
-            ) {
-              return true;
             }
           }
         }
       }
+
       return false;
     };
 
     const deepSearchColumn = (obj, column, searchValue) => {
-      for (let key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          const value = obj[key];
-          if (
-            (key === column ||
-              (column === "S/N" && key === "SN") ||
-              (column === "SN" && key === "S/N")) &&
-            value.toString().toLowerCase().includes(searchValue.toLowerCase())
-          ) {
-            return true;
-          }
-          if (typeof value === "object") {
-            if (Array.isArray(value)) {
-              for (let i = 0; i < value.length; i++) {
-                if (deepSearchColumn(value[i], column, searchValue)) {
-                  return true;
+      const stack = [obj];
+
+      while (stack.length > 0) {
+        const currentObj = stack.pop();
+
+        for (let key in currentObj) {
+          if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
+            const value = currentObj[key];
+            if (
+              (key === column ||
+                (column === "S/N" && key === "SN") ||
+                (column === "SN" && key === "S/N")) &&
+              value.toString().toLowerCase().includes(searchValue.toLowerCase())
+            ) {
+              return true;
+            }
+            if (typeof value === "object") {
+              if (Array.isArray(value)) {
+                for (let i = 0; i < value.length; i++) {
+                  stack.push(value[i]);
                 }
-              }
-            } else {
-              if (deepSearchColumn(value, column, searchValue)) {
-                return true;
+              } else {
+                stack.push(value);
               }
             }
           }
         }
       }
+
       return false;
     };
 
