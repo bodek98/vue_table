@@ -1,30 +1,31 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-  </div>
   <div>
     <input type="text" placeholder="Search" v-model="search" />
     {{ search }}
   </div>
-  <table>
+  <table class="table">
     <thead>
       <tr>
         <th
           v-for="(header, headerIndex) in headers"
           :key="headerIndex"
-          @click="sortItems(header)"
           @dragstart="dragStart(headerIndex)"
           @dragover="dragOver(headerIndex)"
           draggable="true"
         >
-          {{ header }}
-          {{ headerIndex }}
+          {{ header.title }}
+          <button @click="toggleFilter(headerIndex)">
+            {{ header.isFilterClicked ? "Hide" : "Show" }}
+          </button>
           <template v-if="header !== 'COMPONENTS'">
-            <input
-              type="text"
-              :placeholder="header"
-              v-model="filters[header]"
-            />
+            <button @click="sortItems(header.title)">Sort</button>
+            <template v-if="header.isFilterClicked">
+              <input
+                type="text"
+                :placeholder="header.title"
+                v-model="filters[header.title]"
+              />
+            </template>
           </template>
         </th>
       </tr>
@@ -32,7 +33,7 @@
     <tbody>
       <tr v-for="(row, index) in filteredAndSortedRows" :key="index">
         <td v-for="header in headers" :key="header">
-          <template v-if="header === 'COMPONENTS'">
+          <template v-if="header.title === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
             <template v-if="row.isExpanded">
               <tr v-for="(component, cIndex) in row.COMPONENTS" :key="cIndex">
@@ -43,8 +44,8 @@
               </tr>
             </template>
           </template>
-          <template v-else-if="header !== 'isExpanded'">
-            <td>{{ row[header] }}</td>
+          <template v-else-if="header.title !== 'isExpanded'">
+            <td>{{ row[header.title] }}</td>
           </template>
         </td>
       </tr>
@@ -63,12 +64,15 @@ export default {
   setup() {
     const baseUrl = ref("http://localhost:3000");
     let urls = ref([]);
-
-    const headers = ref(["ID", "PRODUCENT", "MODEL", "S/N", "COMPONENTS"]);
+    let headers = ref([
+      { title: "ID", isFilterClicked: false },
+      { title: "PRODUCENT", isFilterClicked: false },
+      { title: "MODEL", isFilterClicked: false },
+      { title: "S/N", isFilterClicked: false },
+      { title: "COMPONENTS", isFilterClicked: false },
+    ]);
     let rows = ref([]);
-
     const isExpanded = ref(false);
-
     let search = ref("");
     const filters = reactive({ ID: "", PRODUCENT: "", MODEL: "", "S/N": "" });
     const sortState = reactive({
@@ -112,6 +116,14 @@ export default {
         row.isExpanded = true;
       } else {
         row.isExpanded = false;
+      }
+    };
+
+    const toggleFilter = (index) => {
+      if (headers.value) {
+        console.log(headers.value[index]);
+        headers.value[index].isFilterClicked =
+          !headers.value[index].isFilterClicked;
       }
     };
 
@@ -247,6 +259,7 @@ export default {
       headers,
       isExpanded,
       expandRow,
+      toggleFilter,
       sortItems,
       filteredAndSortedRows,
       search,
@@ -259,4 +272,4 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style src="./DataTable.scss" lang="scss" scoped></style>
