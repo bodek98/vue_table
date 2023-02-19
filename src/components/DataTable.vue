@@ -1,13 +1,12 @@
 <template>
   <div>
     <input type="text" placeholder="Search" v-model="search" />
-    {{ search }}
   </div>
   <table id="data-table" class="table">
-    <thead class="table__head">
-      <tr class="table__headRow">
+    <div id="expanded-rows-hideout"></div>
+    <thead>
+      <tr>
         <th
-          class="table__headCell"
           v-for="(header, headerIndex) in headers"
           :key="headerIndex"
           @dragstart="dragStart(headerIndex)"
@@ -41,14 +40,6 @@
         <td class="table__bodyCell" v-for="header in headers" :key="header">
           <template v-if="header.title === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
-            <!-- <template v-if="row.isExpanded">
-              <tr v-for="(component, cIndex) in row.COMPONENTS" :key="cIndex">
-                <td>{{ component.ID }}</td>
-                <td>{{ component.PRODUCENT }}</td>
-                <td>{{ component.MODEL }}</td>
-                <td>{{ component.SN }}</td>
-              </tr>
-            </template> -->
           </template>
           <template v-else-if="header.title !== 'isExpanded'">
             <td>{{ row[header.title] }}</td>
@@ -60,7 +51,13 @@
 </template>
 
 <script>
-import { computed, onMounted, reactive, ref } from "@vue/runtime-core";
+import {
+  computed,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+} from "@vue/runtime-core";
 import axios from "axios";
 export default {
   name: "DataTable",
@@ -118,25 +115,34 @@ export default {
       fetchData();
     });
 
+    onUpdated(() => {
+      stickExpandedToParents();
+    });
+
     let rowItem = ref(null);
     const expandRow = (row) => {
       let table = document.getElementById("data-table");
-      let htmlRowId = document.querySelector(
-        "tr#table-data-id-" + row.localID
-      ).rowIndex;
+      const parentHtmlId = "table-data-id-" + row.localID;
+      let htmlRowId = document.querySelector("tr#" + parentHtmlId).rowIndex;
       const components = Object.values(row.COMPONENTS);
       if (row.isExpanded === false) {
         row.isExpanded = true;
-        components.forEach((component) => {
-          let newRow = table.insertRow(htmlRowId + 1);
-          newRow.insertCell(0);
-          newRow.cells[0].innerHTML = component.ID;
-          newRow.insertCell(1);
-          newRow.cells[1].innerHTML = component.PRODUCENT;
-          newRow.insertCell(2);
-          newRow.cells[2].innerHTML = component.MODEL;
-          newRow.insertCell(3);
-          newRow.cells[3].innerHTML = component.SN;
+        components.forEach((component, index) => {
+          let newRow = table.insertRow(htmlRowId + 1 + index);
+          newRow.classList.add("expandedRow");
+          newRow.setAttribute("parent-id", parentHtmlId);
+          for (let i = 0; i < headers.value.length; i++) {
+            const header = headers.value[i];
+            let headerTitle = header.title;
+            if (headerTitle === "S/N") {
+              headerTitle = "SN";
+            }
+            newRow.insertCell(i);
+            newRow.cells[i].innerHTML = component[headerTitle]
+              ? component[headerTitle]
+              : "";
+            newRow.cells[i].setAttribute("header-id", headerTitle);
+          }
         });
       } else {
         row.isExpanded = false;
@@ -275,6 +281,55 @@ export default {
       }
     };
 
+    const cloneAttributes = (target, source) => {
+      [...source.attributes].forEach((attr) => {
+        target.setAttribute(
+          attr.nodeName === "id" ? "data-id" : attr.nodeName,
+          attr.nodeValue
+        );
+      });
+    };
+
+    const stickExpandedToParents = () => {
+      const expandedRows = document.querySelectorAll(".expandedRow");
+      let table = document.getElementById("data-table");
+      for (let i = expandedRows.length - 1; i >= 0; i--) {
+        const expandedRow = expandedRows[i];
+        const parentHtmlId = expandedRow.getAttribute("parent-id");
+        let parentElement = document.querySelector("tr#" + parentHtmlId);
+        if (!parentElement) {
+          document
+            .getElementById("expanded-rows-hideout")
+            .appendChild(expandedRow);
+          continue;
+        }
+        let htmlRowId = parentElement.rowIndex;
+        let newRow = table.insertRow(htmlRowId + 1);
+        cloneAttributes(newRow, expandedRow);
+        replaceRow(newRow, expandedRow);
+        expandedRow.remove();
+      }
+    };
+
+    const replaceRow = (target, source) => {
+      for (let i = 0; i < headers.value.length; i++) {
+        const header = headers.value[i];
+        let headerTitle = header.title;
+        if (headerTitle === "S/N") {
+          headerTitle = "SN";
+        }
+        let oldCell = source.querySelector("[header-id=" + headerTitle + "]");
+        if (!oldCell) {
+          target.insertCell(i);
+          continue;
+        }
+        target.insertCell(i);
+        target.cells[i].innerHTML = oldCell.innerHTML;
+        cloneAttributes(target.cells[i], oldCell);
+        oldCell.remove();
+      }
+    };
+
     let dragIndex = null;
 
     const dragStart = (index) => {
@@ -309,4 +364,4 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style src="./DataTable.scss" lang="scss" scoped></style>
+<style src="./DataTable.scss" lang="scss"></style>
