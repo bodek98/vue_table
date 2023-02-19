@@ -111,8 +111,8 @@ export default {
                 return true;
               }
             } else if (
-              typeof value === "string" &&
-              value.toLowerCase().includes(searchText.toLowerCase())
+              (typeof value === "string" || typeof value === "number") &&
+              value.toString().toLowerCase().includes(searchText.toLowerCase())
             ) {
               return true;
             }
@@ -122,11 +122,16 @@ export default {
       return false;
     };
 
-    function deepSearchColumn(obj, column, searchValue) {
+    const deepSearchColumn = (obj, column, searchValue) => {
       for (let key in obj) {
-        if (Object.prototype.hasOwnProperty.call(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           const value = obj[key];
-          if (key === column && value === searchValue) {
+          if (
+            (key === column ||
+              (column === "S/N" && key === "SN") ||
+              (column === "SN" && key === "S/N")) &&
+            value.toString().toLowerCase().includes(searchValue.toLowerCase())
+          ) {
             return true;
           }
           if (typeof value === "object") {
@@ -145,7 +150,7 @@ export default {
         }
       }
       return false;
-    }
+    };
 
     const filteredRows = computed(() => {
       const searchText = search.value.trim();
@@ -155,31 +160,26 @@ export default {
           return deepSearch(row, searchText);
         });
       }
-      // zaimplementować deepSearchColumn()
+
       if (filters.ID.trim().length > 0) {
-        const colID = "ID";
         return rows.value.filter((row) => {
-          return deepSearchColumn(row, filters.ID.trim(), colID);
-          // row.ID.toString().toLowerCase().includes(filters.ID.toLowerCase())
+          return deepSearchColumn(row, "ID", filters.ID.trim());
         });
       }
-
       if (filters.PRODUCENT.trim().length > 0) {
-        return rows.value.filter((row) =>
-          row.PRODUCENT.toLowerCase().includes(filters.PRODUCENT.toLowerCase())
-        );
+        return rows.value.filter((row) => {
+          return deepSearchColumn(row, "PRODUCENT", filters.PRODUCENT.trim());
+        });
       }
-
       if (filters.MODEL.trim().length > 0) {
-        return rows.value.filter((row) =>
-          row.MODEL.toLowerCase().includes(filters.MODEL.toLowerCase())
-        );
+        return rows.value.filter((row) => {
+          return deepSearchColumn(row, "MODEL", filters.MODEL.trim());
+        });
       }
-
       if (filters["S/N"].trim().length > 0) {
-        return rows.value.filter((row) =>
-          row["S/N"].toLowerCase().includes(filters["S/N"].toLowerCase())
-        );
+        return rows.value.filter((row) => {
+          return deepSearchColumn(row, "S/N", filters["S/N"].trim());
+        });
       }
 
       return rows.value;
