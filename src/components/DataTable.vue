@@ -10,12 +10,15 @@
     <thead>
       <tr>
         <th
-          v-for="(header, index) in headers"
-          :key="index"
+          v-for="(header, headerIndex) in headers"
+          :key="headerIndex"
           @click="sortItems(header)"
+          @dragstart="dragStart(headerIndex)"
+          @dragover="dragOver(headerIndex)"
           draggable="true"
         >
           {{ header }}
+          {{ headerIndex }}
           <template v-if="header !== 'COMPONENTS'">
             <input
               type="text"
@@ -28,8 +31,8 @@
     </thead>
     <tbody>
       <tr v-for="(row, index) in filteredAndSortedRows" :key="index">
-        <td v-for="(rowItem, itemKey, idx) in row" :key="idx">
-          <template v-if="itemKey === 'COMPONENTS'">
+        <td v-for="header in headers" :key="header">
+          <template v-if="header === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
             <template v-if="row.isExpanded">
               <tr v-for="(component, cIndex) in row.COMPONENTS" :key="cIndex">
@@ -40,8 +43,8 @@
               </tr>
             </template>
           </template>
-          <template v-else-if="itemKey !== 'isExpanded'">
-            <td>{{ rowItem }}</td>
+          <template v-else-if="header !== 'isExpanded'">
+            <td>{{ row[header] }}</td>
           </template>
         </td>
       </tr>
@@ -60,15 +63,19 @@ export default {
   setup() {
     const baseUrl = ref("http://localhost:3000");
     let urls = ref([]);
+
     const headers = ref(["ID", "PRODUCENT", "MODEL", "S/N", "COMPONENTS"]);
     let rows = ref([]);
+
     const isExpanded = ref(false);
+
     let search = ref("");
     const filters = reactive({ ID: "", PRODUCENT: "", MODEL: "", "S/N": "" });
     const sortState = reactive({
       column: "",
       order: "asc",
     });
+
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
@@ -83,7 +90,6 @@ export default {
           keepGoing = false;
         }
       }
-
       const fetchData = async () => {
         try {
           const responses = await Promise.all(
@@ -97,7 +103,6 @@ export default {
         } catch (error) {
           console.error(error);
         }
-        console.log(rows.value[1].COMPONENTS);
       };
       fetchData();
     });
@@ -222,6 +227,22 @@ export default {
       }
     };
 
+    let dragIndex = null;
+
+    const dragStart = (index) => {
+      dragIndex = index;
+    };
+
+    const dragOver = (index) => {
+      if (dragIndex !== null && dragIndex !== index) {
+        const headersCopy = [...headers.value];
+        const dragElement = headersCopy.splice(dragIndex, 1)[0];
+        headersCopy.splice(index, 0, dragElement);
+        headers.value = headersCopy;
+        dragIndex = index;
+      }
+    };
+
     return {
       headers,
       isExpanded,
@@ -230,25 +251,12 @@ export default {
       filteredAndSortedRows,
       search,
       filters,
+      dragStart,
+      dragOver,
     };
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-</style>
+<style scoped></style>
