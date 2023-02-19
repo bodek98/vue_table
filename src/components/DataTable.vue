@@ -3,10 +3,11 @@
     <input type="text" placeholder="Search" v-model="search" />
     {{ search }}
   </div>
-  <table class="table">
-    <thead>
-      <tr>
+  <table id="data-table" class="table">
+    <thead class="table__head">
+      <tr class="table__headRow">
         <th
+          class="table__headCell"
           v-for="(header, headerIndex) in headers"
           :key="headerIndex"
           @dragstart="dragStart(headerIndex)"
@@ -14,10 +15,10 @@
           draggable="true"
         >
           {{ header.title }}
-          <button @click="toggleFilter(headerIndex)">
-            {{ header.isFilterClicked ? "Hide" : "Show" }}
-          </button>
-          <template v-if="header !== 'COMPONENTS'">
+          <template v-if="header.title !== 'COMPONENTS'">
+            <button @click="toggleFilter(headerIndex)">
+              {{ header.isFilterClicked ? "Hide" : "Show" }}
+            </button>
             <button @click="sortItems(header.title)">Sort</button>
             <template v-if="header.isFilterClicked">
               <input
@@ -30,19 +31,24 @@
         </th>
       </tr>
     </thead>
-    <tbody>
-      <tr v-for="(row, index) in filteredAndSortedRows" :key="index">
-        <td v-for="header in headers" :key="header">
+    <tbody class="table__body">
+      <tr
+        class="table__bodyRow"
+        v-for="(row, index) in filteredAndSortedRows"
+        :key="index"
+        :id="'table-data-id-' + row.localID"
+      >
+        <td class="table__bodyCell" v-for="header in headers" :key="header">
           <template v-if="header.title === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
-            <template v-if="row.isExpanded">
+            <!-- <template v-if="row.isExpanded">
               <tr v-for="(component, cIndex) in row.COMPONENTS" :key="cIndex">
                 <td>{{ component.ID }}</td>
                 <td>{{ component.PRODUCENT }}</td>
                 <td>{{ component.MODEL }}</td>
                 <td>{{ component.SN }}</td>
               </tr>
-            </template>
+            </template> -->
           </template>
           <template v-else-if="header.title !== 'isExpanded'">
             <td>{{ row[header.title] }}</td>
@@ -102,6 +108,7 @@ export default {
           const data = responses.map((response) => ({
             ...response.data,
             isExpanded: false,
+            localID: i.value++,
           }));
           rows.value = data;
         } catch (error) {
@@ -111,17 +118,36 @@ export default {
       fetchData();
     });
 
+    let rowItem = ref(null);
     const expandRow = (row) => {
+      let table = document.getElementById("data-table");
+      let htmlRowId = document.querySelector(
+        "tr#table-data-id-" + row.localID
+      ).rowIndex;
+      const components = Object.values(row.COMPONENTS);
       if (row.isExpanded === false) {
         row.isExpanded = true;
+        components.forEach((component) => {
+          let newRow = table.insertRow(htmlRowId + 1);
+          newRow.insertCell(0);
+          newRow.cells[0].innerHTML = component.ID;
+          newRow.insertCell(1);
+          newRow.cells[1].innerHTML = component.PRODUCENT;
+          newRow.insertCell(2);
+          newRow.cells[2].innerHTML = component.MODEL;
+          newRow.insertCell(3);
+          newRow.cells[3].innerHTML = component.SN;
+        });
       } else {
         row.isExpanded = false;
+        for (let i = 0; i < components.length; i++) {
+          table.deleteRow(htmlRowId + 1);
+        }
       }
     };
 
     const toggleFilter = (index) => {
       if (headers.value) {
-        console.log(headers.value[index]);
         headers.value[index].isFilterClicked =
           !headers.value[index].isFilterClicked;
       }
@@ -237,7 +263,6 @@ export default {
           }
         });
       }
-
       return data;
     });
 
@@ -277,6 +302,7 @@ export default {
       filters,
       dragStart,
       dragOver,
+      rowItem,
     };
   },
 };
