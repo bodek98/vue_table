@@ -9,7 +9,12 @@
   <table>
     <thead>
       <tr>
-        <th v-for="(header, index) in headers" :key="index">
+        <th
+          v-for="(header, index) in headers"
+          :key="index"
+          @click="sortItems(header)"
+          draggable="true"
+        >
           {{ header }}
           <template v-if="header !== 'COMPONENTS'">
             <input
@@ -22,7 +27,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, index) in filteredRows" :key="index">
+      <tr v-for="(row, index) in filteredAndSortedRows" :key="index">
         <td v-for="(rowItem, itemKey, idx) in row" :key="idx">
           <template v-if="itemKey === 'COMPONENTS'">
             <button @click="expandRow(row)">v</button>
@@ -60,6 +65,10 @@ export default {
     const isExpanded = ref(false);
     let search = ref("");
     const filters = reactive({ ID: "", PRODUCENT: "", MODEL: "", "S/N": "" });
+    const sortState = reactive({
+      column: "",
+      order: "asc",
+    });
     onMounted(async () => {
       let i = ref(0);
       let keepGoing = true;
@@ -153,44 +162,72 @@ export default {
     };
 
     const filteredRows = computed(() => {
+      let data = rows.value;
       const searchText = search.value.trim();
 
       if (searchText.length > 0) {
-        return rows.value.filter((row) => {
+        return data.filter((row) => {
           return deepSearch(row, searchText);
         });
       }
 
       if (filters.ID.trim().length > 0) {
-        return rows.value.filter((row) => {
+        return data.filter((row) => {
           return deepSearchColumn(row, "ID", filters.ID.trim());
         });
-      }
-      if (filters.PRODUCENT.trim().length > 0) {
-        return rows.value.filter((row) => {
+      } else if (filters.PRODUCENT.trim().length > 0) {
+        return data.filter((row) => {
           return deepSearchColumn(row, "PRODUCENT", filters.PRODUCENT.trim());
         });
-      }
-      if (filters.MODEL.trim().length > 0) {
-        return rows.value.filter((row) => {
+      } else if (filters.MODEL.trim().length > 0) {
+        return data.filter((row) => {
           return deepSearchColumn(row, "MODEL", filters.MODEL.trim());
         });
-      }
-      if (filters["S/N"].trim().length > 0) {
-        return rows.value.filter((row) => {
+      } else if (filters["S/N"].trim().length > 0) {
+        return data.filter((row) => {
           return deepSearchColumn(row, "S/N", filters["S/N"].trim());
         });
       }
 
-      return rows.value;
+      return data;
     });
 
+    const filteredAndSortedRows = computed(() => {
+      let data = filteredRows.value;
+
+      if (sortState.column && sortState.order) {
+        const order = sortState.order === "asc" ? 1 : -1;
+        data.value = data.sort((rowA, rowB) => {
+          const valueA = rowA[sortState.column];
+          const valueB = rowB[sortState.column];
+          if (typeof valueA === "string" && typeof valueB === "string") {
+            return order * valueA.localeCompare(valueB);
+          } else if (typeof valueA === "number" && typeof valueB === "number") {
+            return order * (valueA - valueB);
+          } else {
+            return order * valueA.toString().localeCompare(valueB.toString());
+          }
+        });
+      }
+
+      return data;
+    });
+
+    const sortItems = (column) => {
+      if (sortState.column === column) {
+        sortState.order = sortState.order === "asc" ? "desc" : "asc";
+      } else {
+        sortState.column = column;
+        sortState.order = "asc";
+      }
+    };
+
     return {
-      rows,
       headers,
       isExpanded,
       expandRow,
-      filteredRows,
+      sortItems,
+      filteredAndSortedRows,
       search,
       filters,
     };
