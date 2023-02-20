@@ -1,53 +1,89 @@
 <template>
-  <div>
-    <input type="text" placeholder="Search" v-model="search" />
-  </div>
-  <table id="data-table" class="table">
-    <div id="expanded-rows-hideout"></div>
-    <thead>
-      <tr>
-        <th
-          v-for="(header, headerIndex) in headers"
-          :key="headerIndex"
-          @dragstart="dragStart(headerIndex)"
-          @dragover="dragOver(headerIndex)"
-          draggable="true"
+  <div class="data-table-container">
+    <div class="form__group field">
+      <input
+        class="form__field"
+        type="text"
+        placeholder=" "
+        v-model="search"
+        name="global"
+        id="global"
+        required
+      />
+      <label for="global" class="form__label">Wyszukaj</label>
+    </div>
+    <table id="data-table" class="table">
+      <div id="expanded-rows-hideout"></div>
+      <thead>
+        <tr>
+          <th
+            v-for="(header, headerIndex) in headers"
+            :key="headerIndex"
+            @dragstart="dragStart(headerIndex)"
+            @dragover="dragOver(headerIndex)"
+            draggable="true"
+          >
+            <div class="header">
+              <template v-if="header.title !== 'COMPONENTS'">
+                <div>
+                  {{ header.title }}
+                  <font-awesome-icon
+                    icon="fa-solid fa-sort"
+                    class="button"
+                    @click="sortItems(header.title)"
+                  />
+                  <font-awesome-icon
+                    icon="fa-solid fa-filter"
+                    class="button"
+                    @click="toggleFilter(headerIndex)"
+                  />
+                </div>
+                <template v-if="header.isFilterClicked">
+                  <input
+                    type="text"
+                    :placeholder="header.title"
+                    v-model="filters[header.title]"
+                  />
+                </template>
+              </template>
+              <template v-else-if="header.title === 'COMPONENTS'">
+                <font-awesome-icon
+                  icon="fa-solid fa-bars-staggered"
+                  class="button--components"
+                />
+              </template>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(row, index) in filteredAndSortedRows"
+          :key="index"
+          :id="'table-data-id-' + row.localID"
         >
-          {{ header.title }}
-          <template v-if="header.title !== 'COMPONENTS'">
-            <button @click="toggleFilter(headerIndex)">
-              {{ header.isFilterClicked ? "Hide" : "Show" }}
-            </button>
-            <button @click="sortItems(header.title)">Sort</button>
-            <template v-if="header.isFilterClicked">
-              <input
-                type="text"
-                :placeholder="header.title"
-                v-model="filters[header.title]"
+          <td
+            v-for="header in headers"
+            :key="header"
+            :class="{
+              'is-expanded': row.isExpanded && header.title === 'COMPONENTS',
+            }"
+          >
+            <template v-if="header.title === 'COMPONENTS'">
+              <font-awesome-icon
+                @click="expandRow(row)"
+                icon="fa-solid fa-angle-down"
+                :class="{ button: true, 'is-expanded': row.isExpanded }"
               />
             </template>
-          </template>
-        </th>
-      </tr>
-    </thead>
-    <tbody class="table__body">
-      <tr
-        class="table__bodyRow"
-        v-for="(row, index) in filteredAndSortedRows"
-        :key="index"
-        :id="'table-data-id-' + row.localID"
-      >
-        <td class="table__bodyCell" v-for="header in headers" :key="header">
-          <template v-if="header.title === 'COMPONENTS'">
-            <button @click="expandRow(row)">v</button>
-          </template>
-          <template v-else-if="header.title !== 'isExpanded'">
-            <td>{{ row[header.title] }}</td>
-          </template>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+            <template v-else-if="header.title !== 'isExpanded'">
+              {{ row[header.title] }}
+            </template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script>
@@ -129,7 +165,7 @@ export default {
         row.isExpanded = true;
         components.forEach((component, index) => {
           let newRow = table.insertRow(htmlRowId + 1 + index);
-          newRow.classList.add("expandedRow");
+          newRow.classList.add("expanded-row");
           newRow.setAttribute("parent-id", parentHtmlId);
           for (let i = 0; i < headers.value.length; i++) {
             const header = headers.value[i];
@@ -291,7 +327,7 @@ export default {
     };
 
     const stickExpandedToParents = () => {
-      const expandedRows = document.querySelectorAll(".expandedRow");
+      const expandedRows = document.querySelectorAll(".expanded-row");
       let table = document.getElementById("data-table");
       for (let i = expandedRows.length - 1; i >= 0; i--) {
         const expandedRow = expandedRows[i];

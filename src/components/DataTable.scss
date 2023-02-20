@@ -1,18 +1,123 @@
-.table {
-  width: 100%;
+$primary: #15d494;
+$secondary: #3872ef;
+$gray: #9b9b9b;
+$light-gray: #e7e7e7;
 
+.data-table-container {
+  margin: auto;
+}
+table {
   thead tr {
-    background-color: rgb(233, 250, 202);
-    border-bottom: #e7e7e7 1px solid;
+    background: linear-gradient(to right, $primary, $secondary);
+    color: white;
+    border-bottom: $gray 1px solid;
   }
-  tr {
-    border-bottom: #e7e7e7 1px solid;
-    // background-color: #ffffff;
+  thead td {
+    background-color: transparent;
+  }
+  td {
+    background-color: white;
+  }
+  thead input {
+    background: transparent;
+    color: white;
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid white;
+    outline: 0;
+    &::placeholder {
+      color: white;
+    }
   }
 }
-.expandedRow {
-  background-color: #e7e7e7;
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.button {
+  padding: 0 5px;
+  &:hover {
+    cursor: pointer;
+    opacity: 0.8;
+    scale: 0.9;
+  }
+  &--components {
+    cursor: default;
+    padding: 5px;
+  }
+  &.is-expanded {
+    transform: rotate(180deg);
+  }
+}
+.expanded-row,
+.is-expanded,
+.expanded-row td {
+  background-color: $light-gray;
 }
 #expanded-rows-hideout {
   display: none;
+}
+table,
+th,
+td {
+  padding: 8px 16px;
+  border: 1px solid rgb(172, 172, 172);
+  border-collapse: collapse;
+}
+
+.form__group {
+  position: relative;
+  padding: 15px 0 0;
+  margin-bottom: 1em;
+  width: 50%;
+}
+
+.form__field {
+  font-family: inherit;
+  width: 100%;
+  border: 0;
+  border-bottom: 2px solid $gray;
+  outline: 0;
+  font-size: 1.3rem;
+  color: white;
+  padding: 7px 0;
+  background: transparent;
+  transition: border-color 0.2s;
+
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:placeholder-shown ~ .form__label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+  }
+}
+
+.form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: $gray;
+}
+
+.form__field:focus {
+  ~ .form__label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: $primary;
+    font-weight: 700;
+  }
+  padding-bottom: 6px;
+  font-weight: 700;
+  border-width: 3px;
+  border-image: linear-gradient(to right, $primary, $secondary);
+  border-image-slice: 1;
 }
