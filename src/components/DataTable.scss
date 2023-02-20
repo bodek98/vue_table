@@ -29,43 +29,44 @@ table {
       color: white;
     }
   }
-}
-.header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.button {
-  padding: 0 5px;
-  &:hover {
-    cursor: pointer;
-    opacity: 0.8;
-    scale: 0.9;
+  &,
+  th,
+  td {
+    padding: 8px 16px;
+    border: 1px solid rgb(172, 172, 172);
+    border-collapse: collapse;
   }
-  &--components {
-    cursor: default;
-    padding: 5px;
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  &.is-expanded {
-    transform: rotate(180deg);
+  .button {
+    padding: 0 5px;
+    &:hover {
+      cursor: pointer;
+      opacity: 0.8;
+      scale: 0.9;
+    }
+    &--components {
+      cursor: default;
+      padding: 5px;
+    }
+    &.is-expanded {
+      transform: rotate(180deg);
+    }
   }
-}
-.expanded-row,
-.is-expanded,
-.expanded-row td {
-  background-color: $light-gray;
-}
-#expanded-rows-hideout {
-  display: none;
-}
-table,
-th,
-td {
-  padding: 8px 16px;
-  border: 1px solid rgb(172, 172, 172);
-  border-collapse: collapse;
+  .expanded-row,
+  .is-expanded,
+  .expanded-row td {
+    background-color: $light-gray;
+  }
+  #expanded-rows-hideout {
+    display: none;
+  }
 }
 
+// Styling input
 .form__group {
   position: relative;
   padding: 15px 0 0;
