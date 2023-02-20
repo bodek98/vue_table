@@ -1,4 +1,4 @@
-# test_table
+# vue_table
 
 ## Project setup
 ```
