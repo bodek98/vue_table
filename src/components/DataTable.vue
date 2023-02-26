@@ -101,8 +101,6 @@ export default {
     msg: String,
   },
   setup() {
-    const baseUrl = ref("http://localhost:3000");
-    let urls = ref([]);
     let headers = ref([
       { title: "ID", isFilterClicked: false },
       { title: "PRODUCENT", isFilterClicked: false },
@@ -121,25 +119,11 @@ export default {
 
     onMounted(async () => {
       let i = ref(0);
-      let keepGoing = true;
-
-      while (keepGoing) {
-        const url = `${baseUrl.value}/${i.value}`;
-        try {
-          await axios.head(url);
-          urls.value.push(url);
-          i.value++;
-        } catch (error) {
-          keepGoing = false;
-        }
-      }
       const fetchData = async () => {
         try {
-          const responses = await Promise.all(
-            urls.value.map((url) => axios.get(url))
-          );
-          const data = responses.map((response) => ({
-            ...response.data,
+          const responses = await axios.get("./data.json");
+          const data = Object.values(responses.data).map((response) => ({
+            ...response,
             isExpanded: false,
             localID: i.value++,
           }));
